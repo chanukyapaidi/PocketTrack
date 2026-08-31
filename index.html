@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PocketTrack — Smart Expense Tracker for Students</title>
+  <meta name="description" content="PocketTrack helps students track monthly spending and manage budgets smarter." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- ========== NAVBAR ========== -->
+  <nav class="navbar" id="navbar">
+    <div class="container nav-inner">
+      <a href="#" class="brand">
+        <div class="brand-icon">
+          <!-- Money Bag SVG icon -->
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Bag shape with Spider-Man red -->
+            <path d="M8 3.5C8 3.5 9 2 12 2C15 2 16 3.5 16 3.5C16 3.5 19 6 21 14C22 19 17 22 12 22C7 22 2 19 3 14C5 6 8 3.5 8 3.5Z" fill="url(#bagGrad)" />
+            <!-- Tie at the top -->
+            <path d="M7 6H17" stroke="#fff" stroke-width="1.5" stroke-linecap="round" />
+            <path d="M9 4C9 4 10 3 12 3C14 3 15 4 15 4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" />
+            <!-- Rupee Symbol in bright web blue -->
+            <path d="M9 10H14.5M9 13H14C15.5 13 15.5 10 14 10M11 13L14 18" stroke="#42A5F5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <defs>
+              <linearGradient id="bagGrad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#E62429" />
+                <stop offset="1" stop-color="#9B111E" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <span class="brand-name">PocketTrack</span>
+      </a>
+      <div class="nav-links" id="navLinks">
+        <a href="#dashboard" class="nav-a">Dashboard</a>
+        <a href="#expenses"  class="nav-a">Expenses</a>
+        <a href="#analytics" class="nav-a">Analytics</a>
+        <a href="#budget"    class="nav-a">Budget</a>
+      </div>
+      <div class="nav-actions">
+        <button class="icon-btn" id="searchBtn" title="Search" onclick="document.getElementById('searchInput') ? document.getElementById('searchInput').focus() : null">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </button>
+        <button class="theme-btn" id="themeBtn" title="Toggle dark mode">🌙</button>
+        <button class="hamburger" id="hamburger">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#dashboard" class="mob-a" onclick="closeMobileMenu()">Dashboard</a>
+    <a href="#expenses"  class="mob-a" onclick="closeMobileMenu()">Expenses</a>
+    <a href="#analytics" class="mob-a" onclick="closeMobileMenu()">Analytics</a>
+    <a href="#budget"    class="mob-a" onclick="closeMobileMenu()">Budget</a>
+  </div>
+
+  <!-- ========== HERO ========== -->
+  <section class="hero">
+    <div class="container hero-inner">
+      <div class="hero-badge">🎓 Built for students</div>
+      <h1 class="hero-title"><span class="gradient-text">Track smarter.</span><br/><span class="gradient-text">Spend better.</span></h1>
+      <p class="hero-sub">PocketTrack helps you understand where every rupee goes — set budgets, log expenses, and see the full picture with beautiful analytics.</p>
+      <div class="hero-btns">
+        <a href="#add-expense" class="btn btn-primary">+ Add Expense</a>
+        <a href="#dashboard"   class="btn btn-ghost">View Dashboard ↓</a>
+      </div>
+
+      <!-- Floating mini financial stats -->
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-val"><span>₹</span>15,000</div>
+          <div class="hero-stat-lbl">Avg. Budget</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-val">98<span style="font-size:14px">%</span></div>
+          <div class="hero-stat-lbl">Tracking Rate</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-val"><span>₹</span>4,200</div>
+          <div class="hero-stat-lbl">Avg. Savings</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-wave">
+      <svg viewBox="0 0 1440 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0,40 C360,80 1080,0 1440,40 L1440,80 L0,80 Z" fill="var(--bg)"/>
+      </svg>
+    </div>
+  </section>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ========== DASHBOARD ========== -->
+  <section class="section" id="dashboard">
+    <div class="container">
+      <div class="section-head">
+        <h2 class="section-title">📊 Dashboard</h2>
+        <span class="month-badge" id="monthBadge"></span>
+      </div>
+
+      <!-- Budget Warning -->
+      <div class="alert-bar" id="alertBar" style="display:none"></div>
+
+      <!-- Stat Cards -->
+      <div class="stats-grid">
+        <div class="stat-card blue">
+          <div class="stat-top">
+            <span class="stat-icon">💼</span>
+            <span class="stat-lbl">Monthly Budget</span>
+          </div>
+          <div class="stat-val" id="sBudget">₹0</div>
+          <div class="stat-foot">Total allocated</div>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-top">
+            <span class="stat-icon">💸</span>
+            <span class="stat-lbl">Total Spent</span>
+          </div>
+          <div class="stat-val" id="sSpent">₹0</div>
+          <div class="stat-foot">This month</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-top">
+            <span class="stat-icon">🏦</span>
+            <span class="stat-lbl">Remaining</span>
+          </div>
+          <div class="stat-val" id="sRemaining">₹0</div>
+          <div class="stat-foot" id="sRemainingPct">100% left</div>
+        </div>
+        <div class="stat-card amber">
+          <div class="stat-top">
+            <span class="stat-icon">🧾</span>
+            <span class="stat-lbl">Transactions</span>
+          </div>
+          <div class="stat-val" id="sCount">0</div>
+          <div class="stat-foot">Expenses logged</div>
+        </div>
+      </div>
+
+      <!-- Budget Progress -->
+      <div class="card progress-card">
+        <div class="card-row">
+          <span class="card-label">Budget Usage</span>
+          <span class="pct-badge" id="pctBadge">0%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill" style="width:0%"></div>
+        </div>
+        <div class="progress-ends">
+          <span id="spentLabel">₹0 spent</span>
+          <span id="budgetLabel">of ₹0</span>
+        </div>
+      </div>
+
+      <!-- Quick Add Button shortcut -->
+      <div class="dash-quick">
+        <a href="#add-expense" class="btn btn-primary">+ Add New Expense</a>
+        <span class="dash-recent-label">— or scroll down to see your recent expenses</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== ADD EXPENSE ========== -->
+  <section class="section alt-bg" id="add-expense">
+    <div class="container">
+      <div class="section-head">
+        <h2 class="section-title">➕ Add Expense</h2>
+        <p class="section-sub">Log a new transaction to keep your budget on track.</p>
+      </div>
+
+      <div class="form-layout">
+        <div class="card form-card">
+          <form id="expenseForm" novalidate>
+            <div class="form-grid">
+              <div class="fg">
+                <label class="flabel" for="eName">Expense Name <span class="req">*</span></label>
+                <input id="eName" type="text" class="finput" placeholder="e.g. Zomato dinner" maxlength="60" />
+                <span class="ferr" id="errName"></span>
+              </div>
+              <div class="fg">
+                <label class="flabel" for="eAmount">Amount (₹) <span class="req">*</span></label>
+                <div class="prefix-wrap">
+                  <span class="prefix">₹</span>
+                  <input id="eAmount" type="number" class="finput pfx" placeholder="0" min="1" step="0.01" />
+                </div>
+                <span class="ferr" id="errAmount"></span>
+              </div>
+              <div class="fg">
+                <label class="flabel" for="eCategory">Category <span class="req">*</span></label>
+                <select id="eCategory" class="finput fselect">
+                  <option value="">— Select —</option>
+                  <option value="Food">🍔 Food</option>
+                  <option value="Transport">🚌 Transport</option>
+                  <option value="Rent">🏠 Rent</option>
+                  <option value="Groceries">🛒 Groceries</option>
+                  <option value="Education">📚 Education</option>
+                  <option value="Shopping">🛍️ Shopping</option>
+                  <option value="Entertainment">🎬 Entertainment</option>
+                  <option value="Bills">💡 Bills</option>
+                  <option value="Other">📦 Other</option>
+                </select>
+                <span class="ferr" id="errCat"></span>
+              </div>
+              <div class="fg">
+                <label class="flabel" for="eDate">Date <span class="req">*</span></label>
+                <input id="eDate" type="date" class="finput" />
+                <span class="ferr" id="errDate"></span>
+              </div>
+              <div class="fg fg-full">
+                <label class="flabel" for="eNote">Note (Optional)</label>
+                <textarea id="eNote" class="finput ftextarea" placeholder="Any additional details..." rows="2" maxlength="200"></textarea>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn btn-ghost" id="clearBtn">Clear</button>
+              <button type="submit" class="btn btn-primary">✓ Add Expense</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card tips-card">
+          <h3 class="tips-title">💡 Smart Tips</h3>
+          <ul class="tips-list">
+            <li>Log expenses right away for accuracy.</li>
+            <li>Use specific names like "Zomato biryani".</li>
+            <li>Set a realistic monthly budget.</li>
+            <li>Check Analytics weekly for trends.</li>
+            <li>Keep Rent & Bills separate for clarity.</li>
+          </ul>
+          <div class="tips-summary">
+            <p class="ts-label">Budget Remaining</p>
+            <p class="ts-val" id="tipRemaining">₹0</p>
+            <p class="ts-sub" id="tipSpent">₹0 spent this month</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== EXPENSES ========== -->
+  <section class="section" id="expenses">
+    <div class="container">
+      <div class="section-head">
+        <h2 class="section-title">🧾 All Expenses</h2>
+        <p class="section-sub">Search, filter, and manage your transactions.</p>
+      </div>
+
+      <!-- Filter Bar -->
+      <div class="card filter-bar">
+        <div class="filter-row">
+          <div class="search-wrap">
+            <span class="search-ico">🔍</span>
+            <input id="searchInput" type="text" class="finput search-input" placeholder="Search expenses..." />
+          </div>
+          <select id="filterCat" class="finput fselect filter-select">
+            <option value="">All Categories</option>
+            <option value="Food">🍔 Food</option>
+            <option value="Transport">🚌 Transport</option>
+            <option value="Rent">🏠 Rent</option>
+            <option value="Groceries">🛒 Groceries</option>
+            <option value="Education">📚 Education</option>
+            <option value="Shopping">🛍️ Shopping</option>
+            <option value="Entertainment">🎬 Entertainment</option>
+            <option value="Bills">💡 Bills</option>
+            <option value="Other">📦 Other</option>
+          </select>
+          <input id="filterDate" type="date" class="finput filter-date" />
+          <button class="btn btn-ghost btn-sm" id="clearFilters">✕ Clear</button>
+        </div>
+        <p class="filter-info" id="filterInfo">Showing all expenses</p>
+      </div>
+
+      <!-- Expense Cards -->
+      <div id="expenseList"></div>
+    </div>
+  </section>
+
+  <!-- ========== ANALYTICS ========== -->
+  <section class="section alt-bg" id="analytics">
+    <div class="container">
+      <div class="section-head">
+        <h2 class="section-title">📈 Analytics</h2>
+        <p class="section-sub">Visual breakdown of your spending habits.</p>
+      </div>
+
+      <div class="charts-grid">
+        <div class="card chart-card">
+          <h3 class="chart-title">Spending by Category</h3>
+          <div class="chart-box">
+            <canvas id="catChart"></canvas>
+          </div>
+          <div id="chartLegend" class="chart-legend"></div>
+        </div>
+        <div class="card chart-card">
+          <h3 class="chart-title">Budget vs Spent</h3>
+          <div class="chart-box">
+            <canvas id="barChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Category Breakdown Bars -->
+      <div class="card" style="margin-top:1.5rem">
+        <h3 class="chart-title" style="margin-bottom:1.2rem">Category Breakdown</h3>
+        <div id="breakdownList"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== BUDGET ========== -->
+  <section class="section" id="budget">
+    <div class="container">
+      <div class="section-head">
+        <h2 class="section-title">🛡️ Budget Management</h2>
+        <p class="section-sub">Set your monthly limit and track your spending health.</p>
+      </div>
+
+      <div class="budget-layout">
+        <!-- Set Budget -->
+        <div class="card">
+          <h3 class="chart-title">Set Monthly Budget</h3>
+          <p class="chart-sub">Adjust your monthly spending limit anytime.</p>
+          <div class="fg" style="margin-top:1.2rem">
+            <label class="flabel" for="budgetInput">Monthly Budget (₹)</label>
+            <div class="prefix-wrap">
+              <span class="prefix">₹</span>
+              <input id="budgetInput" type="number" class="finput pfx" placeholder="e.g. 10000" min="1" />
+            </div>
+          </div>
+          <button class="btn btn-primary" id="saveBudgetBtn" style="margin-top:1rem;width:100%">💾 Save Budget</button>
+
+          <!-- Spending Alerts -->
+          <div id="spendAlerts" style="margin-top:1.5rem"></div>
+        </div>
+
+        <!-- Budget Donut -->
+        <div class="card budget-donut-card">
+          <h3 class="chart-title" style="text-align:center;margin-bottom:1rem">Budget Overview</h3>
+          <div class="donut-wrap">
+            <canvas id="donutChart" width="200" height="200"></canvas>
+            <div class="donut-center">
+              <p id="donutPct">0%</p>
+              <span>Used</span>
+            </div>
+          </div>
+          <div class="budget-legend">
+            <div class="bl-item"><span class="bl-dot" style="background:#4f7fff"></span><div><p class="bl-label">Budget</p><p class="bl-val" id="bBudget">₹0</p></div></div>
+            <div class="bl-item"><span class="bl-dot" style="background:#ef4444"></span><div><p class="bl-label">Spent</p><p class="bl-val" id="bSpent">₹0</p></div></div>
+            <div class="bl-item"><span class="bl-dot" style="background:#22c55e"></span><div><p class="bl-label">Left</p><p class="bl-val" id="bLeft">₹0</p></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Category Spending -->
+      <div class="card" style="margin-top:1.5rem">
+        <h3 class="chart-title" style="margin-bottom:1.2rem">Spending by Category</h3>
+        <div id="budgetCatList"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== FOOTER ========== -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <span class="brand-icon">💰</span>
+        <div>
+          <p class="footer-name">PocketTrack</p>
+          <p class="footer-tag">Track smarter. Spend better.</p>
+        </div>
+      </div>
+      <div class="footer-actions">
+        <button class="btn btn-ghost btn-sm" id="exportBtn">📥 Export Data</button>
+        <button class="btn btn-danger btn-sm" id="clearAllBtn">🗑️ Clear All Data</button>
+      </div>
+    </div>
+    <p class="footer-copy">© 2026 PocketTrack · Your data stays in your browser · No account needed.</p>
+  </footer>
+
+  <!-- Confirm Modal -->
+  <div class="modal-overlay" id="modal" style="display:none">
+    <div class="modal-box">
+      <div class="modal-emoji" id="modalEmoji">⚠️</div>
+      <h3 id="modalTitle">Are you sure?</h3>
+      <p id="modalDesc">This cannot be undone.</p>
+      <div class="modal-btns">
+        <button class="btn btn-ghost" id="modalCancel">Cancel</button>
+        <button class="btn btn-danger" id="modalOk">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/script.js"></script>
+</body>
+</html>
